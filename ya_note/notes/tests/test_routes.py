@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from notes.models import Note
@@ -16,6 +16,10 @@ class TestRoutes(TestCase):
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Лев Толстой')
         cls.reader = User.objects.create(username='Читатель простой')
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        cls.reader_client = Client()
+        cls.reader_client.force_login(cls.reader)
         cls.note = Note.objects.create(
             title='title',
             text='text',
@@ -55,23 +59,22 @@ class TestRoutes(TestCase):
 
     def test_access_auth_client(self):
         urls = ('notes:list', 'notes:success', 'notes:add')
-        self.client.force_login(self.author)
         for link in urls:
             with self.subTest(link=link):
                 url = reverse(link)
-                responce = self.client.get(url)
+                responce = self.author_client.get(url)
                 self.assertEqual(responce.status_code, HTTPStatus.OK)
 
-    def test_access_author_client(self):
-        urls = ('notes:detail', 'notes:edit', 'notes:delete')
-        users_statuses = (
-            (self.author, HTTPStatus.OK),
-            (self.reader, HTTPStatus.NOT_FOUND),
+    def test_access_client(self):
+        access_links = (
+            ('notes:detail', self.author_client, HTTPStatus.OK),
+            ('notes:edit', self.author_client, HTTPStatus.OK),
+            ('notes:delete', self.author_client, HTTPStatus.OK),
+            ('notes:detail', self.reader_client, HTTPStatus.NOT_FOUND),
+            ('notes:edit', self.reader_client, HTTPStatus.NOT_FOUND),
+            ('notes:delete', self.reader_client, HTTPStatus.NOT_FOUND),
         )
-        for user, status in users_statuses:
-            self.client.force_login(user)
-            for name in urls:
-                with self.subTest(user=user, name=name):
-                    url = reverse(name, args=(self.note.slug,))
-                    response = self.client.get(url)
-                    self.assertEqual(response.status_code, status)
+        for name, client, status in access_links:
+            url = reverse(name, args=(self.note.slug,))
+            response = client.get(url)
+            self.assertEqual(response.status_code, status)

@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
-from django.utils import timezone
 
 import pytest
 from django.conf import settings
 from django.test.client import Client
+from django.urls import reverse
+from django.utils import timezone
 
-from news.forms import BAD_WORDS
 from news.models import Comment, News
 
 
@@ -53,11 +53,6 @@ def comment(author, news):
 
 
 @pytest.fixture
-def news_pk(news):
-    return (news.pk,)
-
-
-@pytest.fixture
 def comment_pk(comment):
     return (comment.pk,)
 
@@ -78,7 +73,7 @@ def bulk_news(author):
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
     ]
-    return News.objects.bulk_create(all_news)
+    News.objects.bulk_create(all_news)
 
 
 @pytest.fixture
@@ -91,10 +86,34 @@ def all_comments(author, news):
             text=f'Текст{index}'
         )
         comment.created = now + timedelta(days=index)
-    print(comment)
-    return comment
+        comment.save()
 
 
 @pytest.fixture
-def bad_words_data():
-    return {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
+def url_home():
+    return reverse('news:home')
+
+
+@pytest.fixture
+def url_detail(news):
+    return reverse('news:detail', args=(news.pk,))
+
+
+@pytest.fixture
+def url_delete(news):
+    return reverse('news:delete', args=(news.pk,))
+
+
+@pytest.fixture
+def url_edit(news):
+    return reverse('news:edit', args=(news.pk,))
+
+
+@pytest.fixture
+def url_comment_edit(comment):
+    return reverse('news:edit', args=(comment.pk,))
+
+
+@pytest.fixture
+def url_comment_delete(comment):
+    return reverse('news:delete', args=(comment.pk,))
