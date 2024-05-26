@@ -79,10 +79,11 @@ class TestLogic(TestCase):
         self.assertEqual(notes_count, pre_count)
 
     def test_author_can_delete_note(self):
-        response = self.author_client.post(self.url_delete)
+        pre_count = Note.objects.count()
+        response = self.author_client.delete(self.url_delete)
         self.assertRedirects(response, self.url_success)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 0)
+        self.assertEqual(notes_count, pre_count - 1)
 
     def test_other_user_cant_edit_note(self):
         response = self.reader_client.post(self.url_edit, data=self.new_post)
@@ -91,6 +92,7 @@ class TestLogic(TestCase):
         self.assertEqual(self.note.title, note_from_db.title)
         self.assertEqual(self.note.text, note_from_db.text)
         self.assertEqual(self.note.slug, note_from_db.slug)
+        self.assertEqual(self.note.author, self.author)
 
     def test_author_can_edit_note(self):
         response = self.author_client.post(self.url_edit, data=self.new_post)

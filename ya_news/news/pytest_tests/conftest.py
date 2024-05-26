@@ -53,16 +53,6 @@ def comment(author, news):
 
 
 @pytest.fixture
-def comment_pk(comment):
-    return (comment.pk,)
-
-
-@pytest.fixture
-def comment_data():
-    return {'text': 'Комментарий'}
-
-
-@pytest.fixture
 def bulk_news(author):
     today = datetime.today()
     all_news = [
@@ -117,3 +107,18 @@ def url_comment_edit(comment):
 @pytest.fixture
 def url_comment_delete(comment):
     return reverse('news:delete', args=(comment.pk,))
+
+
+@pytest.fixture
+def url_login():
+    return reverse('users:login')
+
+
+@pytest.fixture
+def url_logout():
+    return reverse('users:logout')
+
+
+@pytest.fixture
+def url_signup():
+    return reverse('users:signup')
