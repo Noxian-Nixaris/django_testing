@@ -1,22 +1,22 @@
 import pytest
 
 from news.forms import CommentForm
-from yanews import settings
+from django.conf import settings
 
 pytestmark = pytest.mark.django_db
 
 
 def test_news_count(client, bulk_news, url_home):
     response = client.get(url_home)
-    news_list = response.context['object_list']
-    counter = news_list.count()
+    news_obj = response.context['object_list']
+    counter = news_obj.count()
     assert counter == settings.NEWS_COUNT_ON_HOME_PAGE
 
 
 def test_news_order(client, bulk_news, url_home):
     response = client.get(url_home)
-    news_list = response.context['object_list']
-    all_dates = [news.date for news in news_list]
+    news_obj = response.context['object_list']
+    all_dates = [news.date for news in news_obj]
     sorted_dates = sorted(all_dates, reverse=True)
     assert all_dates == sorted_dates
 
