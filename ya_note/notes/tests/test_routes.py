@@ -75,7 +75,7 @@ class TestRoutes(TestCase):
             ('notes:delete', self.reader_client, HTTPStatus.NOT_FOUND),
         )
         for name, client, status in access_links:
-            with self.subTest(name=name):
+            with self.subTest(name=name, client=client, status=status):
                 url = reverse(name, args=(self.note.slug,))
                 response = client.get(url)
                 self.assertEqual(response.status_code, status)
