@@ -1,5 +1,6 @@
 # Django testing
 Тесты для двух приложений `ya_news` и `ya_note`
+
 Cтруктура репозитория:
 ```
 Dev
